@@ -1,0 +1,14 @@
+<div class="ui pagination menu">
+    {% if page_obj.has_previous %}
+        <a class="active blue item" href="?page={{ page_obj.previous_page_number }}">
+            上一页
+        </a>
+
+    {% endif %}
+    {% if page_obj.has_next %}
+        <a class="active blue item" href="?page={{ page_obj.next_page_number }}">
+            下一页
+        </a>
+    {% endif %}
+</div>
+

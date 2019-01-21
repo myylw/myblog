@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}{{ blog.title }}{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $('#comment_button').on('click', function () {
+
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "/add_comment/",
+                    data: $('#comment_form').serialize(),
+                    dateType: "json",
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            alert("提交成功");
+                            window.location.reload();//刷新当前页面.
+                        } else if (data.status == 'fail') {
+                            alert("评论错误，请重新评论");
+                        }
+                    },
+                });
+            });
+        })
+    </script>
+{% endblock %}
+{% block content %}
+
+    <div class="ui centered grid">
+        <div class="two wide column"></div>
+        <div class="ten wide column">
+            <div class="ui segment">
+                <br><br>
+                <div class="ui header">
+                    <a>{{ blog.title }}</a>
+                    <h5>{{ blog.create_date|timesince }} 浏览量：{{ blog.views }}</h5>
+                </div>
+                <div class="ui divider"></div>
+                <p>{{ blog.body }}</p>
+
+                <div class="ui violet segment">
+                    {% if user.is_authenticated %}
+                        <form class="ui form" id="comment_form">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="comment">评论:</label>
+                                <textarea name="content" class="form-control" id="js-content" rows="3"
+                                          placeholder="不超过200个字"></textarea>
+                            </div>
+                            <input name="blog" type="hidden" id="js-bid" value="{{ blog.id }}">
+                            <input name="user" type="hidden" id="js-uid" value="{{ request.user.id }}">
+                            <br>
+                            <div class="form-group">
+                                <div class="ui right floated primary button" id="comment_button">提交</div>
+                            </div>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'UserLoginView' %}">请登陆后评论</a>
+                    {% endif %}
+                    <br><br>
+                </div>
+
+                <div class="ui stacked segments">
+                    {% for comment in comments %}
+                        <div class="ui blue segment">
+                            <div class="ui right floated yellow segment">{{ comment.date|timesince }}</div>
+                            <span style="font-size: medium; ">{{ comment.user.nick_name }}:</span><br><br>
+                            <span style="font-size: large; ">{{ comment.content }}</span>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+        <div class="four wide column"></div>
+    </div>
+
+{% endblock %}
